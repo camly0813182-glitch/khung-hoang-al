@@ -1,49 +1,30 @@
-import streamlit as st
-import google.generativeai as genai
-
-# 1. CẤU HÌNH API (Giữ nguyên Key của bạn)
-genai.configure(api_key="AIzaSyAPr01OtkLHaNMXYc3nYRRbBuePtFE03OQ")
-
-# 2. THIẾT LẬP GIAO DIỆN
-st.set_page_config(page_title="Hệ thống Khủng hoảng AI", page_icon="🤖")
-
-# 3. SIDEBAR CÀI ĐẶT
-with st.sidebar:
-    st.title("⚙️ Cấu hình")
-    tinh_huong = st.selectbox("🎯 Tình huống:", ["Sản phẩm lỗi", "Nhân viên thô lỗ", "Dịch vụ chậm"])
-    muc_do = st.select_slider("🔥 Mức độ giận dữ:", options=["Thấp", "Vừa", "Cao", "Cực đoan"])
-    if st.button("🗑️ Xóa hội thoại"):
-        st.session_state.messages = []
-        st.rerun()
-
-# 4. KHÔNG GIAN CHAT
-st.title("🤖 Crisis Simulation AI")
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
-
-if prompt := st.chat_input("Bạn sẽ giải quyết thế nào?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
-
-    # 5. XỬ LÝ AI THÔNG MINH (TỰ ĐỘNG CHỌN MODEL)
-    with st.spinner("Khách hàng đang soạn tin..."):
-        try:
-            # Ưu tiên dùng gemini-1.5-flash vì nó nhanh và mới nhất
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            
-            huong_dan = f"Bạn là khách hàng VN đang {muc_do} giận dữ vì {tinh_huong}. Trả lời đanh đá, ngắn gọn câu này: {prompt}"
-            response = model.generate_content(huong_dan)
-            ai_reply = response.text
-            
-            st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-            with st.chat_message("assistant"):
-                st.write(ai_reply)
-                
-        except Exception as e:
-            st.error(f"Lỗi hệ thống: {e}. Vui lòng kiểm tra lại API Key hoặc Reboot app.")
+    # --- THAY THẾ ĐOẠN PHẢN HỒI CŨ BẰNG ĐOẠN NÀY ---
+    import random
+    
+    # Danh sách các phản hồi khác nhau tùy theo mức độ giận dữ
+    if muc_do == "Thấp":
+        phan_hoi_list = [
+            "Tôi tạm chấp nhận lời giải thích này, nhưng đừng để xảy ra lần nữa!",
+            "Vậy phương án bồi thường cụ thể của các người là gì?",
+            "Tôi cần một lời cam kết bằng văn bản."
+        ]
+    elif muc_do == "Trung bình":
+        phan_hoi_list = [
+            "Các người nói câu này bao nhiêu lần rồi? Tôi muốn giải quyết ngay!",
+            "Thái độ phục vụ của bên bạn thật sự có vấn đề.",
+            "Tôi không hài lòng, tôi sẽ cân nhắc việc ngừng sử dụng dịch vụ."
+        ]
+    else: # Mức Cao hoặc Cực đoan
+        phan_hoi_list = [
+            "ĐỪNG CÓ NÓI LÝ LẼ VỚI TÔI! Tôi sẽ đăng chuyện này lên hội nhóm 1 triệu thành viên!",
+            "Tôi không cần xin lỗi, tôi muốn gặp quản lý của bạn NGAY LẬP TỨC!",
+            "Các người đang coi thường khách hàng sao? Tôi sẽ báo công an và truyền thông!",
+            "Quá sức chịu đựng rồi! Đợi thư luật sư của tôi đi!"
+        ]
+    
+    # Chọn ngẫu nhiên một câu trong danh sách để trả lời
+    rely = random.choice(phan_hoi_list)
+    
+    st.session_state.messages.append({"role": "assistant", "content": rely})
+    with st.chat_message("assistant"):
+        st.write(rely)
